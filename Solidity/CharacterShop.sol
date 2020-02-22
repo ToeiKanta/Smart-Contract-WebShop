@@ -1,7 +1,7 @@
 pragma solidity >=0.4.22 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-contract NarutoShop {
+contract CharacterShop {
     
     event BuyCharacter(address buyer, Character character); // Event
     event CreateCharacter(address adder, Character character); // Event
@@ -16,9 +16,8 @@ contract NarutoShop {
     }
     
     enum CharacterStatus {Available,Purchased,Unavailable}
-    
-    mapping (address => Character) public userCharacters;
-    
+    // presonal character have been purchase
+    mapping (address => uint256[]) private userCharacters;
     // character storage
     mapping(uint256 => Character) characters;
     uint256[] characterList;
@@ -34,13 +33,23 @@ contract NarutoShop {
     uint256 characterCounter;
     function getCharacterId() private returns(uint) { return ++characterCounter; }
     
+    function isEmpty(string memory _str) pure private returns(bool _isEmpty){
+        bytes memory tempEmptyStringTest = bytes(_str); // Uses memory
+        if (tempEmptyStringTest.length == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
     function createCharacter (string memory _name,uint256 _price) public returns(bool success) {
+        require(!isEmpty(_name),"Name must not empty.");
         uint256 characterId = getCharacterId();
         Character memory character = characters[characterId];
         character.id = characterId;
         character.name = _name;
         character.price = _price;
-        character.characterStatus = NarutoShop.CharacterStatus.Available;
+        character.characterStatus = CharacterShop.CharacterStatus.Available;
         character.seller = msg.sender;
         characters[characterId] = character;
         
@@ -57,12 +66,20 @@ contract NarutoShop {
         return characters[_id];
     }
     
-    function buyCharacter (address _address,uint256 _characterId) public returns(bool success){
+    function getMyCharacter() public view returns(uint256[] memory character){
+        return userCharacters[msg.sender];
+    }
+    
+    function buyCharacter (uint256 _characterId) public payable returns(bool success){
         Character memory c = getCharacterById(_characterId);
-        c.buyer = _address;
-        c.characterStatus = NarutoShop.CharacterStatus.Purchased;
+        require(c.characterStatus == CharacterStatus.Available,"Character not available for sale.");
+        require(msg.value >= c.price,"Not enough money.");
+        c.buyer = msg.sender;
+        c.characterStatus = CharacterShop.CharacterStatus.Purchased;
         characters[_characterId] = c;
-        emit BuyCharacter(_address,c);
+        userCharacters[msg.sender].push(c.id);
+        msg.sender.transfer(msg.value);
+        emit BuyCharacter(msg.sender,c);
         return true;
     }
     
