@@ -1,12 +1,12 @@
-pragma solidity >=0.4.22 <0.7.0;
+pragma solidity >=0.4.22 <0.6.0;
 pragma experimental ABIEncoderV2;
 
 contract CharacterShop {
     
-    event BuyCharacter(address buyer, uint256 characterId); // Event
-    event CreateCharacter(address creater, uint256 characterId); // Event
-    event ErrorCharacterNotAvailable(address buyer, uint256 characterId); // Event
-    event ErrorNotEnoughMoney(address buyer, uint256 characterId); // Event
+    event BuyCharacter(address indexed buyer, uint256 characterId); // Event
+    event CreateCharacter(address indexed creater, uint256 characterId); // Event
+    event ErrorCharacterNotAvailable(address indexed buyer, uint256 characterId); // Event
+    event ErrorNotEnoughMoney(address indexed buyer, uint256 characterId); // Event
     
     struct Character {
         uint256 id;
@@ -66,8 +66,23 @@ contract CharacterShop {
         return characterList;
     }
     
-    function getCharacterById(uint256 _id) public view returns(Character memory character){
+    function getCharacterById(uint256 _id) private view returns(Character memory character){
         return characters[_id];
+    }
+    
+    function getCharacterStrById(uint256 _id) public view returns(uint256 id,string memory name, uint256 price,string memory status,address seller,address buyer,string memory imgPath ){
+        Character memory c = characters[_id];
+        string memory statusTemp;
+        if(c.characterStatus == CharacterStatus.Available){
+            statusTemp = "Available";
+        }else if(c.characterStatus == CharacterStatus.Purchased){
+            statusTemp = "Purchased";
+        }else if(c.characterStatus == CharacterStatus.Purchased){
+            statusTemp = "Unavailable";
+        }else{
+            statusTemp = "unnamed";
+        }
+        return (c.id,c.name,c.price,statusTemp,c.seller,c.buyer,c.imgPath);
     }
     
     function getMyCharacter() public view returns(uint256[] memory character){
