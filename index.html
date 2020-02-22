@@ -15,8 +15,8 @@
             Buy success
         </div>
         <h1>Naruto Character List</h1>
-        <div id="card-list d-flex flex-wrap">
-            <div class="card mb-3 w-20" style="max-width: 900px;">
+        <div id="character-list" class="card-list d-flex flex-wrap">
+            <!-- <div class="card mb-3 w-20" style="max-width: 400px;">
                 <div class="row no-gutters">
                     <div class="col-md-4">
                     <img src="src/img/Sasuke.jpg" class="card-img" alt="...">
@@ -24,12 +24,12 @@
                     <div class="col-md-8">
                     <div class="card-body">
                         <h5 class="card-title">Naruto</h5>
-                        <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate aut inventore, beatae esse iusto, distinctio libero odio nemo quidem consequuntur quos unde maxime velit! Saepe unde pariatur vel nisi aut.</p>
+                        <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate aut inventore, beatae esse iusto, distinctio libero odio nemo quidem.</p>
                         <button id="btnBuy" value="1" class="btn-success btn-block btn btn-lg">Buy 4 ETH</button>
                     </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>    
         <label class="col-lg-2 control-label">
         Character Owner</label>    
@@ -268,7 +268,7 @@
         ];
         var contract = web3.eth.contract(abi);
         var myContract = contract.at(
-            '0x76C48A7CE2861644475daCb9B8F3216b80C1B74E'); 
+            '0xc4fa7DbD3ed44c3Ed005160Cf580d21314A61040'); 
 
         // parse solidity method string
         // const abi2 = solidityToABI('getCharacterById(uint256 _id) :(Character memory character)');
@@ -345,6 +345,23 @@
                                     '<td>'+result[5]+'</td>'+
                                     '</tr>'
                                 );
+
+                                $("#character-list").append(
+                                    `<div class="card m-3 w-20" style="max-width: 400px;">
+                                        <div class="row no-gutters">
+                                            <div class="col-md-4">
+                                            <img src="./src/img/`+result[6]+`" class="card-img" alt="...">
+                                            </div>
+                                            <div class="col-md-8">
+                                            <div class="card-body">
+                                                <h5 class="card-title">`+result[1]+`</h5>
+                                                <p class="card-text"></p>
+                                                <button id="btnBuy" value="`+result[2].c[0]+`" class="btn-success btn-block btn btn-lg">Buy `+result[2].c[0]+` wei (ETH)</button>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>`
+                                )
                             }else{
                                 console.log(error);
                             }

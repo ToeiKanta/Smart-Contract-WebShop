@@ -27,9 +27,9 @@ contract CharacterShop {
     
     constructor() public {
         characterCounter = 0;
-        createCharacter("Sasuke",2.0,"Sasuke.png");
+        createCharacter("Sasuke",2.0,"Sasuke.jpg");
         createCharacter("Sakura",3.0,"Sakura.jpg");
-        createCharacter("Hidan",4.0,"Hidan.jpg");
+        createCharacter("Hidan",4.0,"Hidan.png");
         createCharacter("Hinata",1.0,"Hinata.jpg");
     }
 
