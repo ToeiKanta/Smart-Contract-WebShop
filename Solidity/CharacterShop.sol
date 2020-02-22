@@ -3,8 +3,8 @@ pragma experimental ABIEncoderV2;
 
 contract CharacterShop {
     
-    event BuyCharacter(address buyer, Character character); // Event
-    event CreateCharacter(address adder, Character character); // Event
+    event BuyCharacter(address buyer, uint256 characterId); // Event
+    event CreateCharacter(address creater, uint256 characterId); // Event
     
     struct Character {
         uint256 id;
@@ -54,7 +54,7 @@ contract CharacterShop {
         characters[characterId] = character;
         
         characterList.push(characterId);
-        emit CreateCharacter(msg.sender, character);
+        emit CreateCharacter(msg.sender, character.id);
         return true;
     }
     
@@ -79,7 +79,7 @@ contract CharacterShop {
         characters[_characterId] = c;
         userCharacters[msg.sender].push(c.id);
         msg.sender.transfer(msg.value);
-        emit BuyCharacter(msg.sender,c);
+        emit BuyCharacter(msg.sender,c.id);
         return true;
     }
     
