@@ -10,13 +10,14 @@
 </head>
 <body>
     <div class="container">
-        <h2 id="my-account"></h2>
-        <div id="top-alert-green" class="alert alert-success" role="alert">
-            Buy success
+        <p class="badge badge-success">My Default Wallet Address</p>
+        <p id="my-account" class="badge badge-warning"></p>
+        <div id="top-alert-green" class="alert alertMsg" role="alert">
+            xxxxx
         </div>
-        <h1>Naruto Character List</h1>
-        <div id="card-list d-flex flex-wrap">
-            <div class="card mb-3 w-20" style="max-width: 900px;">
+        <h1 class="pl-1">Naruto Character List</h1>
+        <div id="character-list" class="card-list d-flex flex-wrap justify-content-center">
+            <!-- <div class="card mb-3 w-20" style="max-width: 400px;">
                 <div class="row no-gutters">
                     <div class="col-md-4">
                     <img src="src/img/Sasuke.jpg" class="card-img" alt="...">
@@ -24,19 +25,19 @@
                     <div class="col-md-8">
                     <div class="card-body">
                         <h5 class="card-title">Naruto</h5>
-                        <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate aut inventore, beatae esse iusto, distinctio libero odio nemo quidem consequuntur quos unde maxime velit! Saepe unde pariatur vel nisi aut.</p>
+                        <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate aut inventore, beatae esse iusto, distinctio libero odio nemo quidem.</p>
                         <button id="btnBuy" value="1" class="btn-success btn-block btn btn-lg">Buy 4 ETH</button>
                     </div>
                     </div>
                 </div>
-            </div>
-        </div>    
-        <label class="col-lg-2 control-label">
-        Character Owner</label>    
+            </div> -->
+        </div>
+        <hr>
+        <h1 class="pl-1">Character Owner</h1>    
         <table class="table table-striped table-dark">
             <thead>
               <tr>
-                <th scope="col">#</th>
+                <th scope="col">ID</th>
                 <th scope="col">Character</th>
                 <th scope="col">Buyer Address</th>
               </tr>
@@ -52,6 +53,7 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
     <script>
+        $(".alertMsg").hide();
         if (typeof web3 !== 'undefined') {
             // this statement is executed if you are using 
             // MetaMask 
@@ -268,7 +270,7 @@
         ];
         var contract = web3.eth.contract(abi);
         var myContract = contract.at(
-            '0x76C48A7CE2861644475daCb9B8F3216b80C1B74E'); 
+            '0x063f01c0f4CcA494F42974FDC9e3A6ad13093752'); 
 
         // parse solidity method string
         // const abi2 = solidityToABI('getCharacterById(uint256 _id) :(Character memory character)');
@@ -278,17 +280,37 @@
             myContract.BuyCharacter();
 
         completeEvent.watch(function(error, result) {
-            if (!error){
-		//$("#result").html("Got it");               
-		if (result.args.from == 
-                   web3.eth.defaultAccount){
-                   $("#result").html("Name: " + 
-                       result.args.text + 
-                       " hashed as: " + result.args.hash); 
-               }               
+            if(!error){
+                $('.alertMsg').addClass("alert-success");
+                $('.alertMsg').text("Buy character success!!!");
+                $(".alertMsg").show().delay(5000).queue(function (n) {
+                $(this).hide(); n();});   
+            }else{
+                console.log(error.message);
             }
         });
+        
+        myContract.ErrorNotEnoughMoney().watch(function(error, result){
+            if(!error){
+                $('.alertMsg').addClass("alert-danger");
+                $('.alertMsg').text("Not enough money!!!");
+                $(".alertMsg").show().delay(5000).queue(function (n) {
+                $(this).hide(); n();});   
+            }else{
+                console.log(error.message);
+            }
+        })
 
+        myContract.ErrorCharacterNotAvailable().watch(function(error, result){
+            if(!error){
+                $('.alertMsg').addClass("alert-danger");
+                $('.alertMsg').text("This character not available!!!");
+                $(".alertMsg").show().delay(5000).queue(function (n) {
+                $(this).hide(); n();});   
+            }else{
+                console.log(error.message);
+            }
+        })
         // var errorEvent = 
         //     myContract.RegistrationError();
 
@@ -304,17 +326,24 @@
         //     }
         // });
 
-        $("#btnBuy").click(function() {
-            myContract.buyCharacter("3",
-            {
-              gas: 3000000,
-              from: web3.eth.accounts[0],
-              value: 10
-            },
-	    (error, result) => {
-                $("#top-alert-green").html(result.toString() + " error: " + error );
+        function buyFunction(_id,_price){
+            console.log("id = "+_id + " price = "+_price);
+            myContract.buyCharacter(_id,
+                {
+                    gas: 3000000,
+                    from: web3.eth.accounts[0],
+                    value: _price+1
+                },
+                (error, result) => {
+                    if(!error){
+                        $('.alertMsg').show();
+                        $('.alertMsg').addClass("alert-warning");
+                        $('.alertMsg').html(`<div class="spinner-border text-danger spinner-border-sm" role="status"></div>` + " Buy character pending");
+                    }else{
+                        console.log(error.message);
+                    }
             });
-        });
+        }
 
         $("#btnCheck").click(function() {                       
             myContract.checkName($("#document2").val(), 
@@ -332,7 +361,6 @@
             myContract.getAllCharacterList(
             (error, result) => {
                 if(!error) {
-                    $("#result").html(result.toString());
                     $.each(result, function(index, value){
                         // console.log(value.c[0])
                         myContract.getCharacterStrById(value.c[0],(error,result)=>{
@@ -340,11 +368,28 @@
                                 console.log(result)
                                 $("#character-owner").append(
                                     '<tr>'+
-                                    '<th scope="row">'+"1"+'</th>'+
+                                    '<th scope="row">'+result[0].c[0]+'</th>'+
                                     '<td>'+result[1]+'</td>'+
                                     '<td>'+result[5]+'</td>'+
                                     '</tr>'
                                 );
+
+                                $("#character-list").append(
+                                    `<div class="card m-1 w-20" style="max-width: 500px;">
+                                        <div class="row no-gutters">
+                                            <div class="col-md-4">
+                                            <img src="./src/img/`+result[6]+`" class="card-img" alt="...">
+                                            </div>
+                                            <div class="col-md-8">
+                                            <div class="card-body">
+                                                <h5 class="card-title">`+result[1]+`</h5>
+                                                <p class="card-text"></p>
+                                                <button id="btnBuy" onClick="buyFunction(`+result[0].c[0]+`,`+result[2].c[0]+`)" value="`+result[2].c[0]+`" class="btn-success btn-block btn btn-lg">Buy `+result[2].c[0]+` wei (ETH)</button>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>`
+                                )
                             }else{
                                 console.log(error);
                             }
@@ -353,7 +398,7 @@
                 } else
                     console.error(error);
             });
-            $("#my-account").html("My Default Wallet Address"+"<br>"+web3.eth.defaultAccount)
+            $("#my-account").html(web3.eth.defaultAccount)
         });
     </script>  
 </body>
