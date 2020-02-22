@@ -5,6 +5,8 @@ contract CharacterShop {
     
     event BuyCharacter(address buyer, uint256 characterId); // Event
     event CreateCharacter(address creater, uint256 characterId); // Event
+    event ErrorCharacterNotAvailable(address buyer, uint256 characterId); // Event
+    event ErrorNotEnoughMoney(address buyer, uint256 characterId); // Event
     
     struct Character {
         uint256 id;
@@ -13,6 +15,7 @@ contract CharacterShop {
         CharacterStatus characterStatus;
         address seller;
         address buyer;
+        string imgPath;
     }
     
     enum CharacterStatus {Available,Purchased,Unavailable}
@@ -24,10 +27,10 @@ contract CharacterShop {
     
     constructor() public {
         characterCounter = 0;
-        createCharacter("Naruto",2.0);
-        createCharacter("Sasuke",3.0);
-        createCharacter("Sakura",4.0);
-        createCharacter("Hinata",1.0);
+        createCharacter("Sasuke",2.0,"Sasuke.png");
+        createCharacter("Sakura",3.0,"Sakura.jpg");
+        createCharacter("Hidan",4.0,"Hidan.jpg");
+        createCharacter("Hinata",1.0,"Hinata.jpg");
     }
 
     uint256 characterCounter;
@@ -42,7 +45,7 @@ contract CharacterShop {
         }
     }
     
-    function createCharacter (string memory _name,uint256 _price) public returns(bool success) {
+    function createCharacter (string memory _name,uint256 _price,string memory _imgPath) public returns(bool success) {
         require(!isEmpty(_name),"Name must not empty.");
         uint256 characterId = getCharacterId();
         Character memory character = characters[characterId];
@@ -51,6 +54,7 @@ contract CharacterShop {
         character.price = _price;
         character.characterStatus = CharacterShop.CharacterStatus.Available;
         character.seller = msg.sender;
+        character.imgPath = _imgPath;
         characters[characterId] = character;
         
         characterList.push(characterId);
@@ -74,6 +78,15 @@ contract CharacterShop {
         Character memory c = getCharacterById(_characterId);
         require(c.characterStatus == CharacterStatus.Available,"Character not available for sale.");
         require(msg.value >= c.price,"Not enough money.");
+        // if(c.characterStatus != CharacterStatus.Available){
+        //     emit ErrorCharacterNotAvailable(msg.sender,_characterId);
+        //     return false;
+        // }
+        // if(msg.value <= c.price){
+        //     emit ErrorNotEnoughMoney(msg.sender,_characterId);
+        //     return false;
+        // }
+        
         c.buyer = msg.sender;
         c.characterStatus = CharacterShop.CharacterStatus.Purchased;
         characters[_characterId] = c;
