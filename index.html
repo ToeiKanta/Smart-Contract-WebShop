@@ -10,6 +10,7 @@
 </head>
 <body>
     <div class="container">
+        <h2 id="my-account"></h2>
         <div id="top-alert-green" class="alert alert-success" role="alert">
             Buy success
         </div>
@@ -37,7 +38,7 @@
               <tr>
                 <th scope="col">#</th>
                 <th scope="col">Character</th>
-                <th scope="col">Owner Address</th>
+                <th scope="col">Buyer Address</th>
               </tr>
             </thead>
             <tbody id="character-owner">
@@ -70,13 +71,15 @@
                 "name": "BuyCharacter",
                 "type": "event",
                 "payable": false,
-                "constant": true,
+                "constant": false,
                 "inputs": [
                     {
+                    "indexed": true,
                     "type": "address",
                     "name": "buyer"
                     },
                     {
+                    "indexed": false,
                     "type": "uint256",
                     "name": "characterId"
                     }
@@ -87,13 +90,15 @@
                 "name": "CreateCharacter",
                 "type": "event",
                 "payable": false,
-                "constant": true,
+                "constant": false,
                 "inputs": [
                     {
+                    "indexed": true,
                     "type": "address",
                     "name": "creater"
                     },
                     {
+                    "indexed": false,
                     "type": "uint256",
                     "name": "characterId"
                     }
@@ -104,13 +109,15 @@
                 "name": "ErrorCharacterNotAvailable",
                 "type": "event",
                 "payable": false,
-                "constant": true,
+                "constant": false,
                 "inputs": [
                     {
+                    "indexed": true,
                     "type": "address",
                     "name": "buyer"
                     },
                     {
+                    "indexed": false,
                     "type": "uint256",
                     "name": "characterId"
                     }
@@ -121,13 +128,15 @@
                 "name": "ErrorNotEnoughMoney",
                 "type": "event",
                 "payable": false,
-                "constant": true,
+                "constant": false,
                 "inputs": [
                     {
+                    "indexed": true,
                     "type": "address",
                     "name": "buyer"
                     },
                     {
+                    "indexed": false,
                     "type": "uint256",
                     "name": "characterId"
                     }
@@ -138,7 +147,7 @@
                 "name": "createCharacter ",
                 "type": "function",
                 "payable": false,
-                "constant": true,
+                "constant": false,
                 "inputs": [
                     {
                     "type": "string",
@@ -178,7 +187,7 @@
                 "name": "getMyCharacter",
                 "type": "function",
                 "payable": false,
-                "constant": true,
+                "constant": false,
                 "inputs": [],
                 "outputs": [
                     {
@@ -192,7 +201,7 @@
                 "name": "buyCharacter",
                 "type": "function",
                 "payable": true,
-                "constant": true,
+                "constant": false,
                 "inputs": [
                     {
                     "type": "uint256",
@@ -207,10 +216,10 @@
                 ]
             },
             {
-                "name": "getCharacterById",
+                "name": "getCharacterStrById",
                 "type": "function",
                 "payable": false,
-                "constant": true,
+                "constant": false,
                 "inputs": [
                     {
                     "type": "uint256",
@@ -219,8 +228,39 @@
                 ],
                 "outputs": [
                     {
-                    "type": "Character",
-                    "name": "memory"
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "price",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "status",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "seller",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "buyer",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "imgPath",
+                        "type": "string"
                     }
                 ],
                 "stateMutability": "view",
@@ -228,11 +268,11 @@
         ];
         var contract = web3.eth.contract(abi);
         var myContract = contract.at(
-            '0xBd17D12ccc2D72ce0E123bb543F3360413580c2d');        
+            '0x76C48A7CE2861644475daCb9B8F3216b80C1B74E'); 
 
         // parse solidity method string
-        const abi2 = solidityToABI('getCharacterById(uint256 _id) :(Character memory character)');
-        console.log(abi2);
+        // const abi2 = solidityToABI('getCharacterById(uint256 _id) :(Character memory character)');
+        // console.log(abi2);
 
         var completeEvent =             
             myContract.BuyCharacter();
@@ -265,14 +305,14 @@
         // });
 
         $("#btnBuy").click(function() {
-            myContract.buyCharacter(2,
+            myContract.buyCharacter("3",
             {
-              gas: 300000,
+              gas: 3000000,
               from: web3.eth.accounts[0],
-              value: 1000000000000000000
+              value: 10
             },
 	    (error, result) => {
-                $("#top-alert-green").html(result.toString() + " //// " + result.toString() );
+                $("#top-alert-green").html(result.toString() + " error: " + error );
             });
         });
 
@@ -289,16 +329,31 @@
     </script>
     <script>
         $(document).ready(function(){
-            var fruitsArray = ["Apple", "Banana", "Orange", "Mango", "Pineapple"];
-            $.each(fruitsArray, function(index, value){
-                $("#character-owner").append(
-                    '<tr>'+
-                    '<th scope="row">'+index+'</th>'+
-                    '<td>'+value+'</td>'+
-                    '<td>'+value+'</td>'+
-                    '</tr>'
-                );
+            myContract.getAllCharacterList(
+            (error, result) => {
+                if(!error) {
+                    $("#result").html(result.toString());
+                    $.each(result, function(index, value){
+                        // console.log(value.c[0])
+                        myContract.getCharacterStrById(value.c[0],(error,result)=>{
+                            if(!error) {
+                                console.log(result)
+                                $("#character-owner").append(
+                                    '<tr>'+
+                                    '<th scope="row">'+"1"+'</th>'+
+                                    '<td>'+result[1]+'</td>'+
+                                    '<td>'+result[5]+'</td>'+
+                                    '</tr>'
+                                );
+                            }else{
+                                console.log(error);
+                            }
+                        })
+                    });                
+                } else
+                    console.error(error);
             });
+            $("#my-account").html("My Default Wallet Address"+"<br>"+web3.eth.defaultAccount)
         });
     </script>  
 </body>
