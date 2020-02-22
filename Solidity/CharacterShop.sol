@@ -91,22 +91,23 @@ contract CharacterShop {
     
     function buyCharacter (uint256 _characterId) public payable returns(bool success){
         Character memory c = getCharacterById(_characterId);
-        require(c.characterStatus == CharacterStatus.Available,"Character not available for sale.");
-        require(msg.value >= c.price,"Not enough money.");
-        // if(c.characterStatus != CharacterStatus.Available){
-        //     emit ErrorCharacterNotAvailable(msg.sender,_characterId);
-        //     return false;
-        // }
-        // if(msg.value <= c.price){
-        //     emit ErrorNotEnoughMoney(msg.sender,_characterId);
-        //     return false;
-        // }
+        // require(c.characterStatus == CharacterStatus.Available,"Character not available for sale.");
+        // require(msg.value >= c.price,"Not enough money.");
+        if(c.characterStatus != CharacterStatus.Available){
+            emit ErrorCharacterNotAvailable(msg.sender,_characterId);
+            msg.sender.transfer(msg.value);
+            return false;
+        }
+        if(msg.value <= c.price){
+            emit ErrorNotEnoughMoney(msg.sender,_characterId);
+            msg.sender.transfer(msg.value);
+            return false;
+        }
         
         c.buyer = msg.sender;
         c.characterStatus = CharacterShop.CharacterStatus.Purchased;
         characters[_characterId] = c;
         userCharacters[msg.sender].push(c.id);
-        msg.sender.transfer(msg.value);
         emit BuyCharacter(msg.sender,c.id);
         return true;
     }
