@@ -33,6 +33,8 @@ Simple web shopping using Smart Contract on Ethereum Test network.
 ## All Screenshot
 ### Before
 <img src="./Markdown/img01.png" width="80%"></img>
+### Pending
+<img src="./Markdown/img06.png" width="80%"></img>
 ### After
 <img src="./Markdown/img04.png" width="80%"></img>
 ### Matamask
