@@ -1,4 +1,4 @@
-pragma solidity >=0.4.22 <0.6.0;
+pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
 contract CharacterShop {
@@ -27,10 +27,16 @@ contract CharacterShop {
     
     constructor() public {
         characterCounter = 0;
-        createCharacter("Sasuke",2.0,"Sasuke.jpg");
-        createCharacter("Sakura",3.0,"Sakura.jpg");
+        createCharacter("Sasuke",10.0,"Sasuke.jpg");
+        createCharacter("Sakura",5.0,"Sakura.jpg");
         createCharacter("Hidan",4.0,"Hidan.png");
-        createCharacter("Hinata",1.0,"Hinata.jpg");
+        createCharacter("Hinata",8.0,"Hinata.jpg");
+        createCharacter("Minato",9.0,"Minato.jpg");
+        createCharacter("Gaara",5.0,"Gaara.png");
+        createCharacter("Lee",5.0,"Lee.png");
+        createCharacter("Neji",4.0,"Neji.jpg");
+        createCharacter("Pain",8.0,"Pain.png");
+        createCharacter("Naruto",10.0,"Naruto.jpg");
     }
 
     uint256 characterCounter;

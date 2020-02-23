@@ -17,20 +17,6 @@
         </div>
         <h1 class="pl-1">Naruto Character List</h1>
         <div id="character-list" class="card-list d-flex flex-wrap justify-content-center">
-            <!-- <div class="card mb-3 w-20" style="max-width: 400px;">
-                <div class="row no-gutters">
-                    <div class="col-md-4">
-                    <img src="src/img/Sasuke.jpg" class="card-img" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                    <div class="card-body">
-                        <h5 class="card-title">Naruto</h5>
-                        <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate aut inventore, beatae esse iusto, distinctio libero odio nemo quidem.</p>
-                        <button id="btnBuy" value="1" class="btn-success btn-block btn btn-lg">Buy 4 ETH</button>
-                    </div>
-                    </div>
-                </div>
-            </div> -->
         </div>
         <hr>
         <h1 class="pl-1">Character Owner</h1>    
@@ -40,6 +26,7 @@
                 <th scope="col">ID</th>
                 <th scope="col">Character</th>
                 <th scope="col">Buyer Address</th>
+                <th scope="col">Status</th>
               </tr>
             </thead>
             <tbody id="character-owner">
@@ -52,6 +39,7 @@
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="./config.js"></script>
     <script>
         $(".alertMsg").hide();
         if (typeof web3 !== 'undefined') {
@@ -269,8 +257,7 @@
             }
         ];
         var contract = web3.eth.contract(abi);
-        var myContract = contract.at(
-            '0x063f01c0f4CcA494F42974FDC9e3A6ad13093752'); 
+        var myContract = contract.at(contractAddress); 
 
         // parse solidity method string
         // const abi2 = solidityToABI('getCharacterById(uint256 _id) :(Character memory character)');
@@ -278,20 +265,29 @@
 
         var completeEvent =             
             myContract.BuyCharacter();
-
+        
+        var reloaded = false;
         completeEvent.watch(function(error, result) {
             if(!error){
+                $('.alertMsg').removeClass("alert-warning");
                 $('.alertMsg').addClass("alert-success");
                 $('.alertMsg').text("Buy character success!!!");
                 $(".alertMsg").show().delay(5000).queue(function (n) {
-                $(this).hide(); n();});   
+                $(this).hide(); n();});
+                if(!reloaded){
+                    // location.reload(true);
+                    loadCharacterTable();
+                    reloaded = true;
+                }
             }else{
                 console.log(error.message);
             }
+            
         });
         
         myContract.ErrorNotEnoughMoney().watch(function(error, result){
             if(!error){
+                $('.alertMsg').removeClass("alert-warning");
                 $('.alertMsg').addClass("alert-danger");
                 $('.alertMsg').text("Not enough money!!!");
                 $(".alertMsg").show().delay(5000).queue(function (n) {
@@ -303,6 +299,7 @@
 
         myContract.ErrorCharacterNotAvailable().watch(function(error, result){
             if(!error){
+                $('.alertMsg').removeClass("alert-warning");
                 $('.alertMsg').addClass("alert-danger");
                 $('.alertMsg').text("This character not available!!!");
                 $(".alertMsg").show().delay(5000).queue(function (n) {
@@ -327,6 +324,7 @@
         // });
 
         function buyFunction(_id,_price){
+            reloaded = false;
             console.log("id = "+_id + " price = "+_price);
             myContract.buyCharacter(_id,
                 {
@@ -337,6 +335,8 @@
                 (error, result) => {
                     if(!error){
                         $('.alertMsg').show();
+                        $('.alertMsg').removeClass("alert-danger");
+                        $('.alertMsg').removeClass("alert-success");
                         $('.alertMsg').addClass("alert-warning");
                         $('.alertMsg').html(`<div class="spinner-border text-danger spinner-border-sm" role="status"></div>` + " Buy character pending");
                     }else{
@@ -357,7 +357,9 @@
         
     </script>
     <script>
-        $(document).ready(function(){
+        function loadCharacterTable(){
+            $("#character-owner").empty().append();
+            $("#character-list").empty().append();
             myContract.getAllCharacterList(
             (error, result) => {
                 if(!error) {
@@ -371,20 +373,21 @@
                                     '<th scope="row">'+result[0].c[0]+'</th>'+
                                     '<td>'+result[1]+'</td>'+
                                     '<td>'+result[5]+'</td>'+
+                                    '<td>'+result[3]+'</td>'+
                                     '</tr>'
                                 );
 
                                 $("#character-list").append(
-                                    `<div class="card m-1 w-20" style="max-width: 500px;">
+                                    `<div class="card rounded m-1 w-20" style="max-width: 500px;">
                                         <div class="row no-gutters">
                                             <div class="col-md-4">
                                             <img src="./src/img/`+result[6]+`" class="card-img" alt="...">
                                             </div>
                                             <div class="col-md-8">
                                             <div class="card-body">
-                                                <h5 class="card-title">`+result[1]+`</h5>
+                                                <h2 class="alert alert-primary card-title">`+result[1]+`</h2>
                                                 <p class="card-text"></p>
-                                                <button id="btnBuy" onClick="buyFunction(`+result[0].c[0]+`,`+result[2].c[0]+`)" value="`+result[2].c[0]+`" class="btn-success btn-block btn btn-lg">Buy `+result[2].c[0]+` wei (ETH)</button>
+                                                <button id="btnBuy" onClick="buyFunction(`+result[0].c[0]+`,`+result[2].c[0]+`)" value="`+result[2].c[0]+`" class="${result[3]=="Available"?"btn-success":"btn-secondary"} btn-block btn btn-lg ">buy `+result[2].c[0]+` wei (ETH)</button>
                                             </div>
                                             </div>
                                         </div>
@@ -398,6 +401,9 @@
                 } else
                     console.error(error);
             });
+        };
+        $(document).ready(function(){
+            loadCharacterTable();
             $("#my-account").html(web3.eth.defaultAccount)
         });
     </script>  
