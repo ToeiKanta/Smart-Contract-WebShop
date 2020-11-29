@@ -5,8 +5,8 @@ Simple web shopping using Smart Contract on Ethereum Test network.
 
     require
     1. [nodejs] download from here https://nodejs.org/en/
-    2. [remixIDE https://remix.ethereum.org/] to publish contract
-    3. [MetaMask - ChromeExtension] to be virtual Wallet
+    2. [remixIDE https://remix.ethereum.org/] to publish contract.
+    3. [MetaMask - ChromeExtension] to be virtual Wallet.
 
  ### Upload Smart Contract
  1. go to path Solidity/CharactorShop.sol
